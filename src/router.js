@@ -11,6 +11,8 @@ import Register from './views/Register.vue';
 
 import PersonneCreate from "./views/PersonneCreate.vue";
 import PersonneDetails from "./views/PersonneDetails.vue";
+import PersonneEdit from "./views/PersonneEdit.vue";
+
 
 const routes = [
   { path: "/", component: Home },
@@ -35,6 +37,12 @@ const routes = [
     path: '/personne/:id',
     name: 'PersonneDetails',
     component: PersonneDetails,
+    props: true
+  },
+  {
+    path: '/personne/edit/:id',
+    name: 'PersonneEdit',
+    component: PersonneEdit,
     props: true
   }
 

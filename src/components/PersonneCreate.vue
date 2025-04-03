@@ -140,7 +140,7 @@
         >
           <option disabled value="">Sélectionnez une organisation</option>
           <option v-for="organisation in organisations" :key="organisation.id" :value="organisation.id">
-            {{ organisation.denomination }}
+            {{ organisation.sigle }}
           </option>
         </select>
       </div>

@@ -1,52 +1,62 @@
 <template>
-    <div class="container mx-auto p-6" shadow-md>
-      <h3 class="text-xl font-bold mb-6">Fiche de présence : </h3>
-      
-      <div v-if="loading" class="flex justify-center items-center text-xl text-gray-500">Chargement...</div>
-      
-      <div v-if="error" class="text-red-500 text-center">
-        <p>Une erreur s'est produite lors du chargement des données.</p>
-      </div>
-      
-      <div v-if="!loading && personnes.length > 0" class="overflow-x-auto">
-        <table class="min-w-full table-auto border-collapse border border-gray-300">
-          <thead>
-            <tr class="bg-gray-100">
-              <th class="px-4 py-2 border border-gray-300 text-left font-semibold">Nom</th>
-              <th class="px-4 py-2 border border-gray-300 text-left font-semibold">Âge</th>
-              <th class="px-4 py-2 border border-gray-300 text-left font-semibold">Téléphone</th>
-              <th class="px-4 py-2 border border-gray-300 text-left font-semibold">PSH</th>
-              <th class="px-4 py-2 border border-gray-300 text-left font-semibold">Fonction</th>
-              <th class="px-4 py-2 border border-gray-300 text-left font-semibold">Organisation</th>
-              <th class="px-4 py-2 border border-gray-300 text-left font-semibold">Région</th>
-              <th class="px-4 py-2 border border-gray-300 text-left font-semibold">District</th>
-              <th class="px-4 py-2 border border-gray-300 text-left font-semibold">Commune</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="personne in personnes" :key="personne.id">
-              <td class="px-4 py-2 border border-gray-300">{{ personne.nom }}</td>
-              <td class="px-4 py-2 border border-gray-300">{{ personne.age }}</td>
-              <td class="px-4 py-2 border border-gray-300">{{ personne.tel }}</td>
-              <td class="px-4 py-2 border border-gray-300">
-                {{ personne.psh === 1 ? 'Oui' : 'Non' }}
-                </td>
-              <td class="px-4 py-2 border border-gray-300">{{ personne.fonction_fiche }}</td>
-              <td class="px-4 py-2 border border-gray-300">{{ personne.organisation }}</td>
-
-              <td class="px-4 py-2 border border-gray-300">{{ personne.region }}</td>
-              <td class="px-4 py-2 border border-gray-300">{{ personne.district }}</td>
-              <td class="px-4 py-2 border border-gray-300">{{ personne.commune }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      
-      <div v-else class="text-center text-gray-600">
-        <p>Aucune personne trouvée pour cette activité.</p>
-      </div>
+  <div class="container mx-auto p-6" shadow-md>
+    <h3 class="text-xl font-bold mb-6">Fiche de présence : </h3>
+    
+    <div v-if="loading" class="flex justify-center items-center text-xl text-gray-500">Chargement...</div>
+    
+    <div v-if="error" class="text-red-500 text-center">
+      <p>Une erreur s'est produite lors du chargement des données.</p>
     </div>
+    
+    <div v-if="!loading && personnes.length > 0" class="overflow-x-auto">
+      <table class="min-w-full table-auto border-collapse border border-gray-300">
+        <thead>
+          <tr class="bg-gray-100">
+            <th class="px-4 py-2 border border-gray-300 text-left font-semibold">Actions</th> <!-- Nouvelle colonne pour les actions -->
+            <th class="px-4 py-2 border border-gray-300 text-left font-semibold">Nom</th>
+            <th class="px-4 py-2 border border-gray-300 text-left font-semibold">Sexe/Âge</th>
+            <th class="px-4 py-2 border border-gray-300 text-left font-semibold">Téléphone</th>
+            <th class="px-4 py-2 border border-gray-300 text-left font-semibold">PSH</th>
+            <th class="px-4 py-2 border border-gray-300 text-left font-semibold">Fonction</th>
+            <th class="px-4 py-2 border border-gray-300 text-left font-semibold">Organisation</th>
+            <th class="px-4 py-2 border border-gray-300 text-left font-semibold">Région</th>
+            <th class="px-4 py-2 border border-gray-300 text-left font-semibold">District</th>
+            <th class="px-4 py-2 border border-gray-300 text-left font-semibold">Commune</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr v-for="personne in personnes" :key="personne.id">
+            <td class="px-4 py-2 border border-gray-300">
+              <!-- Lien pour afficher les détails de la personne -->
+              <router-link :to="'/personne/' + personne.id" class="text-blue-500 hover:text-blue-700">📋</router-link>
+              <span class="mx-2"></span>
+              <!-- Lien pour modifier la personne -->
+              <router-link :to="'/personne/edit/' + personne.id" class="text-blue-500 hover:text-blue-700">✏️</router-link>
+            </td>
+            <td class="px-4 py-2 border border-gray-300">{{ personne.nom }}</td>
+            <td class="px-4 py-2 border border-gray-300">{{ personne.age }}</td>
+            <td class="px-4 py-2 border border-gray-300">{{ personne.tel }}</td>
+            <td class="px-4 py-2 border border-gray-300">
+              {{ personne.psh === 1 ? 'Oui' : 'Non' }}
+            </td>
+            <td class="px-4 py-2 border border-gray-300">{{ personne.fonction_fiche }}</td>
+            <td class="px-4 py-2 border border-gray-300">{{ personne.organisation }}</td>
+            <td class="px-4 py-2 border border-gray-300">{{ personne.region }}</td>
+            <td class="px-4 py-2 border border-gray-300">{{ personne.district }}</td>
+            <td class="px-4 py-2 border border-gray-300">{{ personne.commune }}</td>
+           
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    
+    <div v-else class="text-center text-gray-600">
+      <p>Aucune personne trouvée pour cette activité.</p>
+    </div>
+  </div>
 </template>
+
   
   <script>
   import { ref, watch } from 'vue';

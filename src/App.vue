@@ -12,6 +12,9 @@
         <li>
           <RouterLink to="/activite" class="hover:text-blue-600 font-bold">Gestion des activités</RouterLink>
         </li>
+        <li>
+          <RouterLink to="/about" class="hover:text-blue-600 font-bold">Création Organisation</RouterLink>
+        </li>
       </ul>
 
       <!-- Bouton de déconnexion -->

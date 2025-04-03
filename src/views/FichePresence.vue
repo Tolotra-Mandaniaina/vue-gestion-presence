@@ -1,12 +1,14 @@
 <template>
   <div class="h-screen w-screen flex bg-gray-50 mt-2">
     <!-- Formulaire d'ajout de personne (1/4) -->
-    <div class="w-1/4 min-h-[85vh] bg-white shadow-lg rounded-lg p-6 flex flex-col">
+    <div class="w-1/4 min-h-[85vh] bg-white  rounded-lg p-6 flex flex-col">
       <PersonneCreate 
         @personne-creee="handlePersonneCree" 
         :refreshKey="componentKey" 
         @formSubmitted="reloadPersonneActivite"
       />
+
+
     </div>
 
     <!-- Activité + Personnes assignées (3/4) -->
@@ -19,6 +21,8 @@
       </div>
     </div>
   </div>
+
+
 </template>
   
   <script>
@@ -27,7 +31,7 @@
   import axios from 'axios';
   import PersonneCreate from '@/components/PersonneCreate.vue';
   import PersonneActivite from '@/components/PersonneActivite.vue';
-  
+
   export default {
     components: {
       PersonneCreate,
