@@ -86,7 +86,7 @@
 
 <script>
 import { ref, onMounted } from 'vue';
-import axios from 'axios';
+import axios from '@/services/axios';
 
 export default {
   data() {
@@ -103,7 +103,7 @@ export default {
     async fetchPersonneDetails() {
       const { id } = this.$route.params;
       try {
-        const response = await axios.get(`http://127.0.0.1:8000/api/personnes/${id}`);
+        const response = await axios.get(`/personnes/${id}`);
         this.personne = response.data.data;
       } catch (err) {
         this.error = err.response?.data?.message || err.message;

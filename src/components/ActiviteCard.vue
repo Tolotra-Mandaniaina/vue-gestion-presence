@@ -40,7 +40,7 @@
 </template>
 
 <script>
-import axios from 'axios';
+import axios from '@/services/axios';
 
 export default {
   data() {
@@ -51,32 +51,35 @@ export default {
     };
   },
   async mounted() {
-    try {
-      // Récupérer le token depuis le localStorage
-      const token = localStorage.getItem('token');
+  try {
+    const token = localStorage.getItem('token');
+    //console.log('Token utilisé :', token);
 
-      // Vérifier si un token existe
-      if (!token) {
-        throw new Error('Token non trouvé. Veuillez vous connecter.');
-      }
-
-      // Effectuer la requête API avec le token dans l'en-tête Authorization
-      const response = await axios.get("http://127.0.0.1:8000/api/activites-user", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        }
-      });
-
-      this.activites = response.data.activites;  // Axios parse automatiquement la réponse
-    } catch (error) {
-      this.error = error.message || "Une erreur est survenue";
-    } finally {
-      this.loading = false;
+    if (!token) {
+      throw new Error('Token non trouvé. Veuillez vous connecter.');
     }
-  },
+
+    const config = {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
+    //console.log('Config envoyée :', config);
+
+    const response = await axios.get("/activites-user", config);
+    console.log('Réponse serveur :', response.data);
+
+    this.activites = response.data.activites;
+  } catch (error) {
+    console.error('Erreur complète :', error.response || error);
+    this.error = error.message || "Une erreur est survenue";
+  } finally {
+    this.loading = false;
+  }
+},
   methods: {
     voirFichePresence(id) {
-      console.log("Bouton cliqué pour l'activité :", id);
+      //console.log("Bouton cliqué pour l'activité :", id);
       this.$router.push({ name: 'fichePresence', params: { id } });
     }
   }

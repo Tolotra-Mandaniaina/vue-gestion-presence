@@ -1,5 +1,11 @@
 <template>
-  <div class="mt-5 w-full max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-md">
+
+<div v-if="isLoading" class="w-full flex justify-center items-center py-10">
+  <div class="animate-spin rounded-full h-10 w-10 border-t-4 border-blue-500 border-solid"></div>
+  <span class="ml-3 text-blue-600 font-medium">Chargement...</span>
+</div>
+
+  <div v-else class="mt-5 w-full max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-md">
     <h3 class="text-l font-bold mb-4">✏️ Modifier une personne</h3>
     <form @submit.prevent="submitForm" class="space-y-4">
       <!-- Champs existants inchangés -->
@@ -145,7 +151,7 @@
 </template>
 
 <script>
-import axios from "axios";
+import axios from '@/services/axios';
 
 export default {
   props: {
@@ -182,6 +188,8 @@ export default {
       selectedDistrict: null,
       selectedCommune: null,
       ageOptions: ["H+", "H-", "F+", "F-"],
+      isLoading: true, // Ajouté ici
+
     };
   },
   computed: {
@@ -194,6 +202,8 @@ export default {
   },
   methods: {
     async initializeData() {
+      this.isLoading = true; // Commence le chargement
+
       try {
         await this.loadOrganisations();
         await this.loadData();
@@ -202,12 +212,14 @@ export default {
         }
       } catch (error) {
         console.error("Erreur lors de l'initialisation:", error);
+      }  finally {
+        this.isLoading = false; // Fin du chargement
       }
     },
 
     async loadData() {
       try {
-        const response = await axios.get("/data.json");
+        const response = await axios.get("https://safidy-observatoire.net/BO/dist/data.json");
         const groupedData = response.data.reduce((acc, item) => {
           const regionCode = item["CodeRegion"];
           const districtCode = item["CodeDistrict"];
@@ -233,7 +245,7 @@ export default {
 
     async loadOrganisations() {
       try {
-        const response = await axios.get("http://127.0.0.1:8000/api/organisations/");
+        const response = await axios.get("/organisations");
         this.organisations = response.data.organisations || response.data;
         console.log("Organisations chargées:", this.organisations);
       } catch (error) {
@@ -243,7 +255,7 @@ export default {
 
     async loadPersonneData() {
       try {
-        const response = await axios.get(`http://127.0.0.1:8000/api/personnes/${this.currentPersonneId}/`);
+        const response = await axios.get(`/personnes/${this.currentPersonneId}/`);
         const personne = response.data.data || response.data;
         console.log("Données personne:", personne);
 
@@ -317,6 +329,8 @@ export default {
 
     async submitForm() {
       // Activer l'état de soumission
+      console.log("Organisation sélectionnée :", this.formData.organisation); // doit refléter la sélection
+
       this.isSubmitting = true;
 
       // Validation supplémentaire si nécessaire
@@ -352,12 +366,14 @@ export default {
 
       try {
         // Envoyer la requête PUT à l'API
+        
         const response = await axios.put(
-          `http://127.0.0.1:8000/api/personnes/${this.currentPersonneId}/`,
+          `/personnes/${this.currentPersonneId}/`,
           updatedData
         );
-        
-        console.log("Réponse de l'API:", response.data);
+        console.log("MODIF : Données envoyées à l'API :", updatedData);
+
+        //console.log("Réponse de l'API:", response.data);
         
         // Afficher une confirmation
         alert("La personne a été modifiée avec succès !");

@@ -26,9 +26,10 @@
 </template>
   
   <script>
+  import axios from '@/services/axios';
+
   import { ref, watch } from 'vue';
   import { useRoute } from 'vue-router';
-  import axios from 'axios';
   import PersonneCreate from '@/components/PersonneCreate.vue';
   import PersonneActivite from '@/components/PersonneActivite.vue';
 
@@ -68,13 +69,13 @@
         async (newId) => {
           if (newId) {
             activityId.value = String(newId);
-            console.log("ID de l'activité mis à jour :", activityId.value);
+            //console.log("ID de l'activité mis à jour :", activityId.value);
             
             // Charger les détails de l'activité
             try {
               loading.value = true;
-              const response = await axios.get(`http://127.0.0.1:8000/api/activites/${activityId.value}`);
-              console.log("Données de l'activité :", response.data);
+              const response = await axios.get(`/activites/${activityId.value}`);
+              //console.log("Données de l'activité :", response.data);
               activite.value = response.data.activite || response.data;
             } catch (err) {
               error.value = err.response?.data?.message || err.message || "Erreur lors du chargement de l'activité";
@@ -120,7 +121,7 @@
           console.log("Données envoyées à l'API :", payload);
   
           const response = await axios.post(
-            `http://127.0.0.1:8000/api/activites/${activite.value.id}/presences`,
+            `/activites/${activite.value.id}/presences`,
             payload
           );
           console.log("Personne assignée avec succès :", response.data);

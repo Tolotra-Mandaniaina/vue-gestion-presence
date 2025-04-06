@@ -1,6 +1,6 @@
 <script>
 import { ref } from 'vue';
-import axios from 'axios';
+import axios from '@/services/axios';
 
 export default {
   setup() {
@@ -18,7 +18,7 @@ export default {
       successMessage.value = null;
       isLoading.value = true;
       try {
-        await axios.post('http://127.0.0.1:8000/api/organisations', organisation.value);
+        await axios.post('/organisations', organisation.value);
         successMessage.value = 'Organisation créée avec succès !';
         organisation.value = { denomination: '', sigle: '', tel: '' };
       } catch (error) {

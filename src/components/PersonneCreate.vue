@@ -85,9 +85,9 @@
           />
         </div>
 
-         <!-- Champ Nom -->
+         <!-- Champ Fonction -->
          <div class="flex flex-col">
-          <label for="nom" class="text-gray-700 font-medium">Fonction</label>
+          <label for="fonction_fiche" class="text-gray-700 font-medium">Fonction</label>
           <input
             v-model="formData.fonction_fiche"
             type="text"
@@ -161,8 +161,10 @@
   </template>
   
   <script>
-  import axios from "axios";
+  import axios from '@/services/axios';
+
   
+  axios.defaults.headers.common["Accept"] = "application/json";
   export default {
     data() {
       return {
@@ -205,34 +207,43 @@
 
     },
     methods: {
-        async loadData() {
-      try {
-        const response = await axios.get("/data.json");
-        const groupedData = response.data.reduce((acc, item) => {
-          const regionCode = item["CodeRegion"];
-          const districtCode = item["CodeDistrict"];
-          const communeCode = item["CodeCommune"];
-          if (!regionCode || !districtCode || !communeCode) {
-            console.warn("Données manquantes pour un élément", item);
+      async loadData() {
+        try {
+          const response = await axios.get("https://safidy-observatoire.net/BO/dist/data.json");
+          const groupedData = response.data.reduce((acc, item) => {
+            const regionCode = item["CodeRegion"];
+            const districtCode = item["CodeDistrict"];
+            const communeCode = item["CodeCommune"];
+            if (!regionCode || !districtCode || !communeCode) {
+              console.warn("Données manquantes pour un élément", item);
+              return acc;
+            }
+            if (!acc[regionCode]) {
+              acc[regionCode] = { Region: item.Region, CodeRegion: regionCode, districts: {} };
+            }
+            if (!acc[regionCode].districts[districtCode]) {
+              acc[regionCode].districts[districtCode] = { District: item.District, CodeDistrict: districtCode, communes: [] };
+            }
+            acc[regionCode].districts[districtCode].communes.push({ CodeCommune: communeCode, Commune: item.Commune });
             return acc;
+          }, {});
+          this.regions = Object.values(groupedData);
+        } catch (error) {
+          if (error.response) {
+            console.error("Erreur de serveur : ", error.response.status);
+          } else if (error.request) {
+            console.error("Problème de requête réseau : ", error.request);
+          } else {
+            console.error("Erreur inconnue : ", error.message);
           }
-          if (!acc[regionCode]) {
-            acc[regionCode] = { Region: item.Region, CodeRegion: regionCode, districts: {} };
-          }
-          if (!acc[regionCode].districts[districtCode]) {
-            acc[regionCode].districts[districtCode] = { District: item.District, CodeDistrict: districtCode, communes: [] };
-          }
-          acc[regionCode].districts[districtCode].communes.push({ CodeCommune: communeCode, Commune: item.Commune });
-          return acc;
-        }, {});
-        this.regions = Object.values(groupedData);
-      } catch (error) {
-        console.error("Erreur de chargement des données JSON", error);
+          alert("Erreur de chargement des données, veuillez réessayer.");
+        }
       }
-    },
+
+,
     async loadOrganisations() {
       try {
-        const response = await axios.get("http://127.0.0.1:8000/api/organisations/");
+        const response = await axios.get("/organisations");
         this.organisations = response.data.organisations; // Charger les organisations dans le tableau
       } catch (error) {
         console.error("Erreur de chargement des organisations", error);
@@ -320,7 +331,7 @@
 
             try {
                 // Appel API pour soumettre les données
-                const response = await axios.post("http://127.0.0.1:8000/api/personnes/", formDataToSend, {
+                const response = await axios.post("/personnes", formDataToSend, {
                 headers: {
                     "Content-Type": "application/json",  // Si nécessaire
                     "Authorization": "Bearer YOUR_TOKEN_HERE",  // Si l'API nécessite un token

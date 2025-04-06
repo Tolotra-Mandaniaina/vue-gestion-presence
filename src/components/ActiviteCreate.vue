@@ -96,6 +96,7 @@
 </template>
 
 <script>
+
 export default {
     data() {
         return {
@@ -118,7 +119,7 @@ export default {
     methods: {
         async fetchProjets() {
             try {
-                const response = await fetch("http://127.0.0.1:8000/api/projets");
+                const response = await fetch("http://localhost:8000/api/projets");
                 const data = await response.json();
                 console.log("Réponse API :", data);
                 this.projets = data.projets;
@@ -133,7 +134,7 @@ export default {
             console.log("Données envoyées :", newActivite);
 
             try {
-                const response = await fetch("http://127.0.0.1:8000/api/activites", {
+                const response = await fetch("http://localhost:8000/api/activites", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(newActivite),

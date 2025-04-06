@@ -60,8 +60,8 @@
   
   <script>
   import { ref, watch } from 'vue';
-  import axios from 'axios'; // ✅ Ajout de l'import d'axios
-  
+  import axios from '@/services/axios';
+
   import { usePersonneStore } from '@/stores/usePersonneStore';
 
 
@@ -98,10 +98,10 @@
         error.value = null;
   
         try {
-          console.log("🔍 Chargement des personnes pour l'activité :", props.activityId);
-          const response = await axios.get(`http://127.0.0.1:8000/api/personnes/activite/${props.activityId}`);
+          //console.log("🔍 Chargement des personnes pour l'activité :", props.activityId);
+          const response = await axios.get(`/personnes/activite/${props.activityId}`);
           personnes.value = response.data.personnes;
-          console.log("📋 Liste des personnes :", personnes.value);
+          //console.log("📋 Liste des personnes :", personnes.value);
         } catch (err) {
           error.value = err.response?.data?.message || err.message || "Erreur lors du chargement des personnes";
           console.error("❌ Erreur lors du chargement des personnes:", err);

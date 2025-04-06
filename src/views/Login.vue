@@ -27,9 +27,15 @@
 
         <button
           type="submit"
-          class="w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          :disabled="loading"
+          class="w-full bg-blue-500 text-white py-2 px-4 rounded-lg flex justify-center items-center hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
         >
-          Se connecter
+          <svg v-if="loading" class="animate-spin h-5 w-5 mr-2 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+            <path class="opacity-75" fill="currentColor"
+              d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+          </svg>
+          <span>{{ loading ? 'Connexion...' : 'Se connecter' }}</span>
         </button>
 
         <p v-if="error" class="mt-4 text-center text-red-500 text-sm">{{ error }}</p>
@@ -49,16 +55,22 @@ export default {
         password: '',
       },
       error: null,
+      loading: false,
     };
   },
   methods: {
     async login() {
+      this.error = null;
+      this.loading = true;
       try {
+        await axios.get('https://safidy-observatoire.net/BO/public/sanctum/csrf-cookie'); // initialise la session (obligatoire)
         const response = await axios.post('/login', this.form);
-        localStorage.setItem('token', response.data.token); // Sauvegarder le token dans le localStorage
-        this.$router.push('/activite'); // Rediriger vers le dashboard après la connexion
+        localStorage.setItem('token', response.data.token);
+        this.$router.push('/activite');
       } catch (err) {
         this.error = err.response?.data?.message || 'Une erreur est survenue';
+      } finally {
+        this.loading = false;
       }
     }
   }
@@ -66,5 +78,5 @@ export default {
 </script>
 
 <style scoped>
-/* Aucun style supplémentaire nécessaire, car Tailwind gère toute la mise en page */
+/* Pas de styles supplémentaires nécessaires grâce à Tailwind */
 </style>

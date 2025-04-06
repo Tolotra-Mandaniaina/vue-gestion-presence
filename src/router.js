@@ -16,7 +16,7 @@ import PersonneEdit from "./views/PersonneEdit.vue";
 
 const routes = [
   { path: "/", component: Home },
-  { path: "/about", component: About },
+  { path: "/about", component: About,  meta: { requiresAuth: true } },
   { path: "/projet", component: Projet },
   { path: "/activite", component: Activite,  meta: { requiresAuth: true } },
   { path: "/personne", component: Personne },
@@ -48,8 +48,9 @@ const routes = [
 
 ];
 
+
 const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHistory('/BO/dist/'),
   routes,
 });
 
