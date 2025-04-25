@@ -1,5 +1,6 @@
 <template>
     <div class="mt-5 w-full max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-md">
+
       <h3 class="text-l font-bold mb-4"> ➕Créer une personne</h3>
       <form @submit.prevent="submitForm" class="space-y-4">
         
@@ -103,7 +104,7 @@
         <!-- Sélection Région -->
         <div class="flex flex-col">
           <label for="region" class="text-gray-700 font-medium">Région</label>
-          <select v-model="selectedRegion" @change="loadDistricts" id="region" class="p-2 border rounded-md">
+          <select v-model="selectedRegion" @change="loadDistricts" id="region" class="p-2 border rounded-md" disabled>
             <option v-for="region in regions" :key="region.CodeRegion" :value="region.Region">
               {{ region.Region }}
             </option>
@@ -111,7 +112,7 @@
         </div>
   
         <!-- Sélection District -->
-        <div class="flex flex-col" v-if="districts.length">
+        <div class="flex flex-col">
           <label for="district" class="text-gray-700 font-medium">District</label>
           <select v-model="selectedDistrict" @change="loadCommunes" id="district" class="p-2 border rounded-md">
             <option v-for="district in districts" :key="district.CodeDistrict" :value="district.District">
@@ -121,7 +122,7 @@
         </div>
   
         <!-- Sélection Commune -->
-        <div class="flex flex-col" v-if="communes.length">
+        <div class="flex flex-col">
           <label for="commune" class="text-gray-700 font-medium">Commune</label>
           <select v-model="selectedCommune" id="commune" class="p-2 border rounded-md">
             <option v-for="commune in communes" :key="commune.CodeCommune" :value="commune.Commune">
@@ -161,10 +162,16 @@
   </template>
   
   <script>
+
   import axios from '@/services/axios';
+  import { useUserStore } from '@/stores/user';
+
+  axios.defaults.headers.common["Accept"] = "application/json";
 
   
-  axios.defaults.headers.common["Accept"] = "application/json";
+
+
+
   export default {
     data() {
       return {
@@ -199,17 +206,28 @@
         ageOptions: [
           "H+", "H-", "F+", "F-" // Tranches d'âges à adapter
         ],
+        user: null,
+        regionUser: '',
+        regionCible: '',
+      
+
+
+
       };
     },
     created() {
-      this.loadData();
       this.loadOrganisations(); // Charger les organisations
-
-    },
+      const userStore = useUserStore();
+      this.user = userStore.user;
+      },
+  
     methods: {
+
       async loadData() {
         try {
-          const response = await axios.get("https://safidy-observatoire.net/BO/dist/data.json");
+         // const response = await axios.get("https://safidy-observatoire.net/BO/dist/data.json");
+          const response = await axios.get("http://localhost:5173/data.json");
+
           const groupedData = response.data.reduce((acc, item) => {
             const regionCode = item["CodeRegion"];
             const districtCode = item["CodeDistrict"];
@@ -238,19 +256,77 @@
           }
           alert("Erreur de chargement des données, veuillez réessayer.");
         }
-      }
+      },
 
-,
-    async loadOrganisations() {
-      try {
-        const response = await axios.get("/organisations");
-        this.organisations = response.data.organisations; // Charger les organisations dans le tableau
-      } catch (error) {
-        console.error("Erreur de chargement des organisations", error);
-      }
-    },
-  
-        loadDistricts() {
+      async loadOrganisations() {
+        try {
+          const response = await axios.get("/organisations");
+          this.tousLesorganisations = response.data.organisations;
+
+          // Dictionnaire de mappage des utilisateurs à leurs régions
+          const userRegionMap = {
+            "PCEC HM": "HAUTE MATSIATRA",
+            "CCAP HM": "HAUTE MATSIATRA",
+            "CCAP SOFIA": "SOFIA",
+            "CCAP MENABE": "MENABE",
+            "CCAP AANDREFANA": "ATSIMO-ANDREFANA",
+            "CCAP ANOSY": "ANOSY",
+            "CCAP AATSINANANA": "ATSIMO-ATSINANANA",
+            "PCEC AATSINANANA": "ATSIMO-ATSINANANA",
+            "PCEC ANOSY": "ANOSY",
+            "PCEC AANDREFANA": "ATSIMO-ANDREFANA",
+            "PCEC MENABE": "MENABE",
+            "PCEC SOFIA": "SOFIA"
+          };
+
+          // Définir la région cible selon l'utilisateur
+          this.regionCible = userRegionMap[this.user.name] || null;
+
+          if (!this.regionCible) {
+            console.warn("Aucune région assignée à cet utilisateur :", this.user.name);
+          }
+
+          // Filtrage des organisations en fonction de la région cible
+          this.organisations = this.regionCible 
+            ? this.tousLesorganisations.filter(org => org.region === this.regionCible)
+            : [];
+
+          console.log("Organisations chargées :", this.organisations);
+        } catch (error) {
+          console.error("Erreur de chargement des organisations", error);
+        }
+      },
+
+      loadRegion() {
+          this.regionUser = this.user?.name;
+
+          const regionMap = {
+            "PCEC HM": "HAUTE MATSIATRA",
+            "CCAP HM": "HAUTE MATSIATRA",
+            "CCAP SOFIA": "SOFIA",
+            "CCAP MENABE": "MENABE",
+            "CCAP AANDREFANA": "ATSIMO-ANDREFANA",
+            "CCAP ANOSY": "ANOSY",
+            "CCAP AATSINANANA": "ATSIMO-ATSINANANA",
+            "PCEC AATSINANANA": "ATSIMO-ATSINANANA",
+            "PCEC ANOSY": "ANOSY",
+            "PCEC AANDREFANA": "ATSIMO-ANDREFANA",
+            "PCEC MENABE": "MENABE",
+            "PCEC SOFIA": "SOFIA"
+          };
+
+          if (regionMap[this.regionUser]) {
+            this.selectedRegion = regionMap[this.regionUser];
+            console.log("🔧 Appel de loadDistricts()");
+            this.loadDistricts();
+          } else {
+            console.log("Utilisateur non identifié");
+          }
+        },
+          
+    
+    loadDistricts() {
+
         // Trouver la région sélectionnée dans l'accumulateur
         const selectedRegionData = this.regions.find(region => region.Region === this.selectedRegion);
 
@@ -265,8 +341,7 @@
         this.selectedDistrict = null;
         this.selectedCommune = null;
         this.communes = [];
-        }
-        ,
+    },
         
       loadCommunes() {
         // Trouver le district sélectionné dans les districts
@@ -368,7 +443,7 @@
               
 
             }
-            },
+          },
             
       resetForm() {
         this.formData = {
@@ -391,7 +466,16 @@
         this.districts = [];
         this.communes = [];
       },
-    }
+
+       
+    },
+    mounted() {
+
+    // Chargement des régions, puis chargement de la région par défaut
+    this.loadData().then(() => {
+      this.loadRegion();
+    });
+  }
   };
   </script>
   

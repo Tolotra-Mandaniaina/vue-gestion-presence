@@ -13,7 +13,7 @@
           <RouterLink to="/activite" class="hover:text-blue-600 font-bold">Gestion des activités</RouterLink>
         </li>
       </ul>
-
+    
       <!-- Bouton de déconnexion -->
       <button
         class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600"
@@ -26,9 +26,22 @@
 </template>
 
 <script setup>
+import { onMounted } from 'vue'
 import { RouterLink, useRouter } from "vue-router";
+import { storeToRefs } from 'pinia'
+import { useUserStore } from '@/stores/user'
+
+const userStore = useUserStore()
+const { user, loading, error } = storeToRefs(userStore)
 
 const router = useRouter();
+
+// Appeler fetchUser pour récupérer les informations utilisateur
+onMounted(() => {
+  console.log("Appel à fetchUser pour récupérer l'utilisateur...");
+
+  userStore.fetchUser()
+})
 
 // Fonction de déconnexion
 const logout = () => {
@@ -39,6 +52,7 @@ const logout = () => {
   router.push('/login'); // ou router.push('/') si vous voulez rediriger vers l'accueil
 };
 </script>
+
 
 <style scoped>
 /* Vous pouvez ajouter des styles spécifiques ici */

@@ -1,5 +1,7 @@
 // src/router.js
 import { createRouter, createWebHistory } from "vue-router";
+import Navbar from './components/NavBar.vue';
+
 import Home from "./views/Home.vue";
 import About from "./views/About.vue";
 import Projet from "./views/Projet.vue";
@@ -44,13 +46,20 @@ const routes = [
     name: 'PersonneEdit',
     component: PersonneEdit,
     props: true
-  }
+  },
+  {
+      path: '/',
+      name: 'Home',
+      component: Navbar
+  },
 
 ];
 
 
 const router = createRouter({
-  history: createWebHistory('/BO/dist/'),
+  //history: createWebHistory('/BO/dist/'),
+  history: createWebHistory(),
+
   routes,
 });
 

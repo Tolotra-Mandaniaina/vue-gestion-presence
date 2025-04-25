@@ -2,7 +2,9 @@ import axios from 'axios';
 
 // Crée une instance d'Axios avec des configurations par défaut
 const axiosInstance = axios.create({
-  baseURL: 'https://safidy-observatoire.net/BO/public/api',
+  //baseURL: 'https://safidy-observatoire.net/BO/public/api',
+    baseURL: 'http://localhost:8000/api',
+
   withCredentials: true, // Change l'URL de base selon ton API
   timeout: 15000, // Timeout de 5 secondes
   headers: {

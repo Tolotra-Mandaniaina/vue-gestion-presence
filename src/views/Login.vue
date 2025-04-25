@@ -46,6 +46,7 @@
 
 <script>
 import axios from '@/services/axios';
+import { useUserStore } from '@/stores/user'
 
 export default {
   data() {
@@ -63,9 +64,15 @@ export default {
       this.error = null;
       this.loading = true;
       try {
+        const userStore = useUserStore() // 👈 instanciation ici
+
         await axios.get('https://safidy-observatoire.net/BO/public/sanctum/csrf-cookie'); // initialise la session (obligatoire)
         const response = await axios.post('/login', this.form);
         localStorage.setItem('token', response.data.token);
+
+        // 🔁 Mettre à jour le store Pinia directement après login
+        await userStore.fetchUser()
+
         this.$router.push('/activite');
       } catch (err) {
         this.error = err.response?.data?.message || 'Une erreur est survenue';

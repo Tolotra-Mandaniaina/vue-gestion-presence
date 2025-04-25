@@ -94,7 +94,7 @@
 
       <div class="flex flex-col">
         <label for="region" class="text-gray-700 font-medium">Région</label>
-        <select v-model="selectedRegion" @change="loadDistricts" id="region" class="p-2 border rounded-md">
+        <select v-model="selectedRegion" @change="loadDistricts" id="region" class="p-2 border rounded-md" disabled>
           <option v-for="region in regions" :key="region.CodeRegion" :value="region.Region">
             {{ region.Region }}
           </option>
@@ -152,6 +152,7 @@
 
 <script>
 import axios from '@/services/axios';
+import { useUserStore } from '@/stores/user';
 
 export default {
   props: {
@@ -189,6 +190,8 @@ export default {
       selectedCommune: null,
       ageOptions: ["H+", "H-", "F+", "F-"],
       isLoading: true, // Ajouté ici
+      user: null,
+
 
     };
   },
@@ -199,6 +202,8 @@ export default {
   },
   created() {
     this.initializeData();
+    const userStore = useUserStore();
+    this.user = userStore.user;
   },
   methods: {
     async initializeData() {
@@ -219,7 +224,9 @@ export default {
 
     async loadData() {
       try {
-        const response = await axios.get("https://safidy-observatoire.net/BO/dist/data.json");
+        //const response = await axios.get("https://safidy-observatoire.net/BO/dist/data.json");
+        const response = await axios.get("http://localhost:5173/data.json");
+
         const groupedData = response.data.reduce((acc, item) => {
           const regionCode = item["CodeRegion"];
           const districtCode = item["CodeDistrict"];
@@ -244,14 +251,46 @@ export default {
     },
 
     async loadOrganisations() {
-      try {
-        const response = await axios.get("/organisations");
-        this.organisations = response.data.organisations || response.data;
-        console.log("Organisations chargées:", this.organisations);
-      } catch (error) {
-        console.error("Erreur de chargement des organisations", error);
-      }
-    },
+        try {
+          const response = await axios.get("/organisations");
+          this.tousLesorganisations = response.data.organisations;
+
+          // Dictionnaire de mappage des utilisateurs à leurs régions
+          const userRegionMap = {
+            "PCEC HM": "HAUTE MATSIATRA",
+            "CCAP HM": "HAUTE MATSIATRA",
+            "CCAP SOFIA": "SOFIA",
+            "CCAP MENABE": "MENABE",
+            "CCAP AANDREFANA": "ATSIMO-ANDREFANA",
+            "CCAP ANOSY": "ANOSY",
+            "CCAP AATSINANANA": "ATSIMO-ATSINANANA",
+            "PCEC AATSINANANA": "ATSIMO-ATSINANANA",
+            "PCEC ANOSY": "ANOSY",
+            "PCEC AANDREFANA": "ATSIMO-ANDREFANA",
+            "PCEC MENABE": "MENABE",
+            "PCEC SOFIA": "SOFIA"
+          };
+
+          // Définir la région cible selon l'utilisateur
+          this.regionCible = userRegionMap[this.user.name] || null;
+
+          if (!this.regionCible) {
+            console.warn("Aucune région assignée à cet utilisateur :", this.user.name);
+          }
+
+          // Filtrage des organisations en fonction de la région cible
+          this.organisations = this.regionCible 
+            ? this.tousLesorganisations.filter(org => org.region === this.regionCible)
+            : [];
+
+          console.log("Organisations chargées :", this.organisations);
+        } catch (error) {
+          console.error("Erreur de chargement des organisations", error);
+        }
+      },
+
+
+    
 
     async loadPersonneData() {
       try {
@@ -298,6 +337,32 @@ export default {
         console.error("Erreur chargement personne:", error);
       }
     },
+    loadRegion() {
+          this.user.name = this.user?.name;
+
+          const regionMap = {
+            "PCEC HM": "HAUTE MATSIATRA",
+            "CCAP HM": "HAUTE MATSIATRA",
+            "CCAP SOFIA": "SOFIA",
+            "CCAP MENABE": "MENABE",
+            "CCAP AANDREFANA": "ATSIMO-ANDREFANA",
+            "CCAP ANOSY": "ANOSY",
+            "CCAP AATSINANANA": "ATSIMO-ATSINANANA",
+            "PCEC AATSINANANA": "ATSIMO-ATSINANANA",
+            "PCEC ANOSY": "ANOSY",
+            "PCEC AANDREFANA": "ATSIMO-ANDREFANA",
+            "PCEC MENABE": "MENABE",
+            "PCEC SOFIA": "SOFIA"
+          };
+
+          if (regionMap[this.user.name]) {
+            this.selectedRegion = regionMap[this.user.name];
+            console.log("🔧 Appel de loadDistricts()");
+            this.loadDistricts();
+          } else {
+            console.log("Utilisateur non identifié");
+          }
+        },
 
     async loadDistricts() {
       const selectedRegionData = this.regions.find(region => region.Region === this.selectedRegion);
